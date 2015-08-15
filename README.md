@@ -1,4 +1,5 @@
 HttpForm, The Http Request Form Parser
+==========================================
 
 This module was developed for submit form by http protocol, upload and encoding images and videos.
 
@@ -59,7 +60,7 @@ sleep(100)
 client()
 ```
 
-Also, you can use HTML5 `form`:
+Also, you can use **HTML5 `<form>`**:
 
 ```
 <form action="http://127.0.0.1:8000/" method="POST" enctype="multipart/form-data">
