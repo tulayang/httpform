@@ -308,7 +308,7 @@ when isMainModule:
 
                 "--AaB03x--\r\n"
             
-            form = newHttpForm("/home/king/tmp")
+            form = newHttpForm(getTempDir())
 
             (fields, files) = form.parse("multipart/form-data; boundary=AaB03x", data)
 
@@ -342,7 +342,7 @@ when isMainModule:
 
                 "--AaB03x--\r\n"
             
-            form = newAsyncHttpForm("/home/king/tmp")
+            form = newAsyncHttpForm(getTempDir())
 
             (fields, files) = await form.parseAsync("multipart/form-data; boundary=AaB03x", data)
 

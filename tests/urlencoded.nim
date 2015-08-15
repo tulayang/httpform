@@ -4,7 +4,7 @@ import ../httpform, asyncdispatch, asynchttpserver,
 proc server() =
     var 
         server = newAsyncHttpServer()
-        form = newAsyncHttpForm("/home/king/tmp", true)
+        form = newAsyncHttpForm(getTempDir(), true)
     proc cb(req: Request) {.async.} =
         var (fields, files) = await form.parseAsync(req.headers["Content-Type"], req.body)
         assert fields["a"] == newJString("100")
