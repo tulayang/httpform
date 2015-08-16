@@ -89,20 +89,6 @@ proc parse*(x: HttpForm, contentType: string, body: string):
                     raise newException(FormError, "bad content-type header, no multipart boundary")
             else:
                 result.fields = body.parseUnknown()
-                    
-
-            # if contentType.toLower().contains("multipart/form-data"):
-            #     var cs = contentType.split("; ")
-            #     var i = contentType.find("; ")
-            #     if i 
-            #     if cs.len() < 2:
-            #         raise newException(FormError, "bad content-type header, no multipart boundary")
-            #     var bs = cs[1].split("=")
-            #     if bs.len() < 2 or bs[0] != "boundary" or bs[1].len() == 0:
-            #         raise newException(FormError, "bad content-type header, no multipart boundary")
-            #     result = body.parseMultipart(bs[1], x.tmp, x.keepExtname)
-            # else:
-            #     result.fields = body.parseUnknown()
 
 proc parseAsync*(x: AsyncHttpForm, contentType: string, body: string):
                 Future[tuple[fields: JsonNode, files: JsonNode]]
