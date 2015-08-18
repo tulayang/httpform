@@ -6,68 +6,42 @@ This module was developed for submit form by http protocol, upload and encoding 
 Example
 --------
 
-Parse a file upload:
+Upload files with **HTML5 `<form>`**:
 
 ```
-import httpform, asyncdispatch, asynchttpserver, net, os, strtabs, json
+import httpform, asyncdispatch, asynchttpserver,
+       strutils, os, strtabs, json
 
-proc server() =
-    var 
+proc main() =
+    var
         server = newAsyncHttpServer()
-        form = newAsyncHttpForm("/home/king/tmp", true)
+        form = newAsyncHttpForm(getTempDir(), true)
+        html = """
+<!Doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+</head>
+<body>
+<form action="/" method="POST"  enctype="multipart/form-data">
+    <input type="text" name="name1"/>
+    <input type="file" name="files" multiple/>
+    <input type="submit" name="submit"></input>
+</form>
+</body>
+</html>"""
+
     proc cb(req: Request) {.async.} =
         var (fields, files) = await form.parseAsync(req.headers["Content-Type"], req.body)
-        assert fields["username"]         == newJString("Tom")
-        echo   files["upload"][0]["path"] #  "/home/king/tmp/55cdf98a0fbeb30400000000.txt"
-        assert files["upload"][0]["size"] == newJInt(6)
-        assert files["upload"][0]["type"] == newJString("text/plain")
-        assert files["upload"][0]["name"] == newJString("file1.txt")
-        echo   files["upload"][1]["path"] #  "/home/king/tmp/55cdf98a0fbeb30400000001.gif"
-        assert files["upload"][1]["size"] == newJInt(12)
-        assert files["upload"][1]["type"] == newJString("image/gif")
-        assert files["upload"][1]["name"] == newJString("file2.gif")
-        quit(0)
+        if req.reqMethod.toLower() == "get":
+            await req.respond(Http200, html)
+        else:
+            echo fields
+            echo files
+            await req.respond(Http200, "hello")
     waitFor server.serve(Port(8000), cb)
 
-proc client() =
-    var 
-        socket = newSocket()
-        data = "--AaB03x\r\n" &
-                "Content-Disposition: form-data; name=\"username\"\r\n\r\n" &
-                "Tom\r\n" &
-
-                "--AaB03x\r\n" &
-                "Content-Disposition: form-data; name=\"upload\"; filename=\"file1.txt\"\r\n" &
-                "Content-Type: text/plain\r\n\r\n" & 
-                "000000\r\n" &
-
-                "--AaB03x\r\n" &
-                "Content-Disposition: form-data; name=\"upload\"; filename=\"file2.gif\"\r\n" &
-                "Content-Type: image/gif\r\n" &
-                "Content-Transfer-Encoding: base64\r\n\r\n" &
-                "010101010101\r\n" &
-
-                "--AaB03x--\r\n"
-            
-    socket.connect("127.0.0.1", Port(8000)) 
-    socket.send("POST /path HTTP/1.1\r\L")
-    socket.send("Content-Type: multipart/form-data; boundary=AaB03x\r\L")
-    socket.send("Content-Length: " & $data.len() & "\r\L\r\L")
-    socket.send(data)
-    
-server()
-sleep(100)
-client()
-```
-
-Also, you can use **HTML5 `<form>`**:
-
-```
-<form action="http://127.0.0.1:8000/" method="POST" enctype="multipart/form-data">
-	<input type="text" name="name1"/>
-	<input type="file" name="files" multiple/>
-	<input type="submit" name="submit"></input>
-</form>
+main()
 ```
 
 API
