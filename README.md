@@ -44,6 +44,31 @@ proc main() =
 main()
 ```
 
+Useage
+-------
+
+`$ nimble init` make a .nimble file, and edit:
+
+```
+[Package]
+name          = "app"
+version       = "0.1.0"
+author        = "Me"
+description   = "My app"
+license       = "MIT"
+
+[Deps]
+Requires: "nim >= 0.11.0, httpform >= 0.1.0"
+```
+
+then you can import **httpform**:
+
+```
+import httpform
+
+// TODO
+```
+
 API
 ----
 
