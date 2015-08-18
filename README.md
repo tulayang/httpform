@@ -51,7 +51,7 @@ API
 FormError = object of Exception
 ```
 
-Raised for invalid content-type or request body.
+raised for invalid content-type or request body.
 
 ```
 HttpForm = ref object
@@ -59,23 +59,25 @@ HttpForm = ref object
     keepExtname: bool
 ```
 
-Form parser. 
+form parser. 
 
 ```
 AsyncHttpForm = HttpForm
 ```
 
-Asynchronous form parser.
+asynchronous form parser.
 
 ```
 proc newHttpForm(tmp: string, keepExtname = true): HttpForm
 ```
 
-Creates a new form parser. `tmp` should be set, which will save the uploaded temporary file. If `keepExtname` is true, the extname will be reserved.
+creates a new form parser. `tmp` should be set, which will save the uploaded temporary file. If `keepExtname` is true, the extname will be reserved.
 
 ```
 proc newAsyncHttpForm*(tmp: string, keepExtname = true): AsyncHttpForm
 ```
+
+creates a new asynchronous form parser.
 
 ```
 proc parse*(x: HttpForm, contentType: string, body: string):
@@ -83,7 +85,7 @@ proc parse*(x: HttpForm, contentType: string, body: string):
            {.tags: [WriteIOEffect, ReadIOEffect].}
 ```
 
-Parse http request body.
+parse http request body.
 
 ```
 proc parseAsync*(x: AsyncHttpForm, contentType: string, body: string):
@@ -91,4 +93,4 @@ proc parseAsync*(x: AsyncHttpForm, contentType: string, body: string):
                 {.async, tags: [RootEffect, WriteIOEffect, ReadIOEffect].}
 ```
 
-Asynchronous parse http request body.
+asynchronous parse http request body.
