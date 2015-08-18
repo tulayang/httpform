@@ -105,17 +105,17 @@ proc newAsyncHttpForm*(tmp: string, keepExtname = true): AsyncHttpForm
 creates a new asynchronous form parser.
 
 ```
-proc parse*(x: HttpForm, contentType: string, body: string):
-           tuple[fields: JsonNode, files: JsonNode]
-           {.tags: [WriteIOEffect, ReadIOEffect].}
+proc parse(x: HttpForm, contentType: string, body: string):
+          tuple[fields: JsonNode, files: JsonNode]
+          {.tags: [WriteIOEffect, ReadIOEffect].}
 ```
 
 parse http request body.
 
 ```
-proc parseAsync*(x: AsyncHttpForm, contentType: string, body: string):
-                Future[tuple[fields: JsonNode, files: JsonNode]]
-                {.async, tags: [RootEffect, WriteIOEffect, ReadIOEffect].}
+proc parseAsync(x: AsyncHttpForm, contentType: string, body: string):
+               Future[tuple[fields: JsonNode, files: JsonNode]]
+               {.async, tags: [RootEffect, WriteIOEffect, ReadIOEffect].}
 ```
 
 asynchronous parse http request body.
