@@ -73,11 +73,11 @@ proc pickDisposition(x: Multipart) =
         dispItems: seq[string]
         i, h: int
 
-    x.disposition = nil
-    x.name = nil 
-    x.filename = nil
-    x.ctype = nil
-    x.encoding = nil
+    x.disposition = ""
+    x.name = ""
+    x.filename = ""
+    x.ctype = ""
+    x.encoding = ""
 
     for line in x.body[x.head..x.tail-4].split("\r\n"):
         i = line.find(": ")
@@ -119,16 +119,16 @@ proc pickDisposition(x: Multipart) =
 template doWrite(content: string) =
     var 
         path: string
-    if not x.name.isNil():
+    if x.name != "":
         # echo "---", repr content
         # echo "---"
-        if x.filename.isNil(): 
+        if x.filename == "": 
             result.fields[x.name] = newJString(content)
         else:
             path = joinPath(x.tmp, if x.keepExtname: $genOid() & splitFile(x.filename).ext
                                    else: $genOid())
             case x.encoding
-            of nil, "binary", "7bit", "8bit": writeFile(path, content)  
+            of "", "binary", "7bit", "8bit": writeFile(path, content)  
             of "base64": writeFile(path, decode(content))
             else: raise newException(FormError, "unknow transfer encoding")  
             if not result.files.hasKey(x.name): result.files[x.name] = newJArray()
@@ -158,21 +158,23 @@ template pickContent(x: Multipart) =
             x.state = msEndTk
             break
 
-proc parseMultipart(body: string, boundary: string, tmp: string, keepExtname: bool):
-                   tuple[fields: JsonNode, files: JsonNode]
-                   {.tags: [WriteIOEffect].} =
-    var x = newMultipart(body, boundary, tmp, keepExtname)
-    result.fields = newJObject()
-    result.files = newJObject()
+# temporarily removed {.tags: [WriteIOEffect].}
+proc parseMultipart(body, boundary, tmp: string, keepExtname: bool):
+                   tuple[fields, files: JsonNode] =
+    var
+      x = newMultipart(body, boundary, tmp, keepExtname)
+      jsonic: tuple[fields, files: JsonNode]
+    jsonic.fields = newJObject()
+    jsonic.files = newJObject()
+    result = jsonic
     while true:
         case x.state
         of msBeginTk: x.pickBeginTk()
         of msDisposition: x.pickDisposition()
         of msContent: x.pickContent()
         of msEndTk: break
-        else: discard
 
-proc writeFileAsync(path: string, content: string) {.async.} =
+proc writeFileAsync(path, content: string) {.async.} =
     var file = openAsync(path, fmWrite)
     await file.write(content)
     file.close()
@@ -181,16 +183,16 @@ proc doWriteAsync(x: Multipart, content: string,
                   r: tuple[fields: JsonNode, files: JsonNode]) {.async.} =
     var 
         path: string
-    if not x.name.isNil():
+    if x.name != "":
         # echo "---", repr content
         # echo "---"
-        if x.filename.isNil(): 
+        if x.filename == "": 
             r.fields[x.name] = newJString(content)
         else:
             path = joinPath(x.tmp, if x.keepExtname: $genOid() & splitFile(x.filename).ext
                                    else: $genOid())
             case x.encoding
-            of nil, "binary", "7bit", "8bit": await writeFileAsync(path, content)  
+            of "", "binary", "7bit", "8bit": await writeFileAsync(path, content)  
             of "base64": await writeFileAsync(path, decode(content))
             else: raise newException(FormError, "unknow transfer encoding")  
             if not r.files.hasKey(x.name): r.files[x.name] = newJArray()
@@ -232,4 +234,3 @@ proc parseMultipartAsync(body: string, boundary: string, tmp: string, keepExtnam
         of msDisposition: x.pickDisposition()
         of msContent: await x.pickContentAsync(result)
         of msEndTk: break
-        else: discard
