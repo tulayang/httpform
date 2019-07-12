@@ -8,7 +8,7 @@ type
         keepExtname: bool
     AsyncHttpForm = HttpForm
 
-template newHttpFormImpl(result: expr) =
+template newHttpFormImpl(result) =
     new(result)
     result.tmp = tmp
     result.keepExtname = keepExtname
@@ -39,16 +39,18 @@ proc parseUrlencoded(body: string): JsonNode {.inline.} =
             else:
                 result[s[0..i-1]] = newJString(s[i+1..h])
 
-template parseOctetStreamImpl(write: stmt) {.immediate.} =
+# temporarily removed pragma {.immediate.}
+template parseOctetStreamImpl(write) =
     var options = newJArray()
-    options.add(newFile(path, body.len(), "application/octet-stream", nil))
+    options.add(newFile(path, body.len(), "application/octet-stream", ""))
     result = newJObject()
-    result[nil] = options
+    result[""] = options
     write
 
-proc parseOctetStream(body: string, tmp: string): JsonNode {.tags: [WriteIOEffect].} =
+#temporarily removed pragma {.tags: [WriteIOEffect].}
+proc parseOctetStream(body: string, tmp: string): JsonNode =
     var path = joinPath(tmp, $genOid())
-    parseOctetStreamImpl: 
+    parseOctetStreamImpl():   
         writeFile(path, body)
 
 proc parseOctetStreamAsync(body: string, tmp: string): Future[JsonNode] 
@@ -59,16 +61,16 @@ proc parseOctetStreamAsync(body: string, tmp: string): Future[JsonNode]
 
 proc parseUnknown(body: string): JsonNode =
     result = newJObject()
-    result[nil] = newJString(body)
+    result[""] = newJString(body)
 
 proc parse*(x: HttpForm, contentType: string, body: string):
-           tuple[fields: JsonNode, files: JsonNode]
-           {.tags: [WriteIOEffect, ReadIOEffect].} =  
+           tuple[fields: JsonNode, files: JsonNode] =
+#           {.tags: [WriteIOEffect, ReadIOEffect].} =  
     var 
         i: int  
         s: string
-    if not body.isNil() and body.len() > 0:
-        if contentType.isNil():
+    if body != "" and body.len() > 0:
+        if contentType != "":
             raise newException(FormError, "bad content-type header, no content-type")
         case contentType.toLower()
         of "application/json": 
@@ -92,12 +94,13 @@ proc parse*(x: HttpForm, contentType: string, body: string):
 
 proc parseAsync*(x: AsyncHttpForm, contentType: string, body: string):
                 Future[tuple[fields: JsonNode, files: JsonNode]]
-                {.async, tags: [RootEffect, WriteIOEffect, ReadIOEffect].} =  
+                {.async.} = 
+                #{.async, tags: [RootEffect, WriteIOEffect, ReadIOEffect].} =  
     var 
         i: int  
         s: string  
-    if not body.isNil() and body.len() > 0:
-        if contentType.isNil():
+    if body != "" and body.len() > 0:
+        if contentType != "":
             raise newException(FormError, "bad content-type header, no content-type")
         case contentType.toLower()
         of "application/json": 
