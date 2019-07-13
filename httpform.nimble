@@ -1,9 +1,8 @@
-[Package]
-name          = "httpform"
+# Package
 version       = "0.2.0"
-author        = "Wang Tong"
+author        = "Wang Tong; Akito"
 description   = "Http request form parser"
 license       = "MIT"
 
-[Deps]
-Requires: "nim >= 0.20.0"
+# Dependencies
+requires "nim >= 0.20.0"
