@@ -1,11 +1,18 @@
-import ../httpform, asyncdispatch, asynchttpserver,
-       threadpool, net, os, strtabs, json
+import
+  ../httpform,
+  asyncdispatch,
+  asynchttpserver,
+  threadpool,
+  net,
+  os,
+  strtabs,
+  json
 
 proc server() =
     var 
         server = newAsyncHttpServer()
         form = newAsyncHttpForm(getTempDir(), true)
-    proc cb(req: Request) {.async.} =
+    proc cb(req: Request) {.discardable, async.} =
         var (fields, files) = await form.parseAsync(req.headers["Content-Type"], req.body)
         assert fields["b"][0]["a"] == newJInt(2)
         assert files               == nil
@@ -21,9 +28,10 @@ proc client() =
     socket.send("Content-Type: application/json\r\L")
     socket.send("Content-Length: " & $data.len() & "\r\L\r\L")
     socket.send(data)
-    
+
+{.experimental.} 
 proc main() =
-    parallel:
+    parallel():
         spawn server()
         sleep(100)
         spawn client()

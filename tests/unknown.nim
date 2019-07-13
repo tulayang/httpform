@@ -7,7 +7,7 @@ proc server() =
         form = newAsyncHttpForm(getTempDir(), true)
     proc cb(req: Request) {.async.} =
         var (fields, files) = await form.parseAsync(req.headers["Content-Type"], req.body)
-        assert fields[nil] == newJString("Hello world!")
+        assert fields[""] == newJString("Hello world!")
         assert files       == nil
         quit(0)
     waitFor server.serve(Port(8000), cb)
@@ -21,8 +21,9 @@ proc client() =
     socket.send("Content-Length: 12\r\L\r\L")
     socket.send("Hello world!")
 
+{.experimental.}
 proc main() =
-    parallel:
+    parallel():
         spawn server()
         sleep(100)
         spawn client()

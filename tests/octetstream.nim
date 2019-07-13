@@ -8,10 +8,10 @@ proc server() =
     proc cb(req: Request) {.async.} =
         var (fields, files) = await form.parseAsync(req.headers["Content-Type"], req.body)
         assert fields == nil
-        echo   files[nil][0]["path"] 
-        assert files[nil][0]["size"] == newJInt(6)
-        assert files[nil][0]["name"] == newJString(nil)
-        assert files[nil][0]["type"] == newJString("application/octet-stream")
+        echo   files[""][0]["path"] 
+        assert files[""][0]["size"] == newJInt(6)
+        assert files[""][0]["name"] == newJString("")
+        assert files[""][0]["type"] == newJString("application/octet-stream")
         quit(0)
     waitFor server.serve(Port(8000), cb)
 
@@ -24,9 +24,10 @@ proc client() =
     socket.send("Content-Type: application/octet-stream\r\n")
     socket.send("Content-Length: " & $data.len() & "\r\n\r\n")
     socket.send(data)
-    
+
+{.experimental.}
 proc main() =
-    parallel:
+    parallel():
         spawn server()
         sleep(100)
         spawn client()
