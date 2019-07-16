@@ -1,6 +1,6 @@
 import strutils, os, oids, base64, asyncfile, asyncdispatch, json
 
-include "./multipart"
+include "httpform/multipart"
 
 type
     HttpForm = ref object
@@ -100,7 +100,7 @@ proc parseAsync*(x: AsyncHttpForm, contentType: string, body: string):
         i: int  
         s: string  
     if body != "" and body.len() > 0:
-        if contentType != "":
+        if contentType == "":
             raise newException(FormError, "bad content-type header, no content-type")
         case contentType.toLower()
         of "application/json": 
