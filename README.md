@@ -37,7 +37,7 @@ proc main() =
             await req.respond(Http200, html)
         else:
             # retrieve sent field and files
-			echo fields["name"] 
+		echo fields["name"] 
         	echo files["upload"][0]["path"] 
         	echo files["upload"][0]["size"] 
         	echo files["upload"][0]["type"]
